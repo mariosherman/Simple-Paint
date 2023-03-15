@@ -5,7 +5,7 @@ from layer_util import Layer
 class LayerStore(ABC):
 
     def __init__(self) -> None:
-        pass
+        self.layer = Layer()
 
     @abstractmethod
     def add(self, layer: Layer) -> bool:
@@ -13,7 +13,7 @@ class LayerStore(ABC):
         Add a layer to the store.
         Returns true if the LayerStore was actually changed.
         """
-        pass
+        
 
     @abstractmethod
     def get_color(self, start, timestamp, x, y) -> tuple[int, int, int]:
