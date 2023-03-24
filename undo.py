@@ -1,8 +1,12 @@
 from __future__ import annotations
 from action import PaintAction
 from grid import Grid
+from data_structures.stack_adt import ArrayStack
 
 class UndoTracker:
+
+    def __init__(self) -> None:
+        self.some_tree = ArrayStack(10000)
 
     def add_action(self, action: PaintAction) -> None:
         """
@@ -11,6 +15,8 @@ class UndoTracker:
         If your collection is already full,
         feel free to exit early and not add the action.
         """
+        # teh plan:
+        #
         raise NotImplementedError()
 
     def undo(self, grid: Grid) -> PaintAction|None:

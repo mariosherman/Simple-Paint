@@ -4,6 +4,7 @@ import math
 from grid import Grid
 from layer_util import get_layers, Layer
 from layers import lighten
+from undo import UndoTracker
 
 class MyWindow(arcade.Window):
     """ Painter Window """
@@ -287,8 +288,9 @@ class MyWindow(arcade.Window):
 
     def on_init(self):
         """Initialisation that occurs after the system initialisation."""
-        pass
-
+        self.undo_tracker = UndoTracker()
+        
+    
     def on_reset(self):
         """Called when a window reset is requested."""
         pass
@@ -302,7 +304,30 @@ class MyWindow(arcade.Window):
         px: x position of the brush.
         py: y position of the brush.
         """
-        pass
+        self.grid[px][py].add(layer)
+        k = self.grid.brush_size
+        for i in range(self.grid.brush_size+1):
+            if px + i < len(self.grid[0]):
+                self.grid[px+i][py].add(layer)
+            if py + i < len(self.grid[0]):
+                self.grid[px][py+i].add(layer)
+            if px-i >= 0:
+                self.grid[px-i][py].add(layer)
+            if py-i >= 0:   
+                self.grid[px][py-i].add(layer)
+
+            for j in range(1, k+1):
+                if px+i < len(self.grid[0]) and py+j < len(self.grid[0]):
+                    self.grid[px+i][py+j].add(layer)
+                if px-i >= 0 and py+j < len(self.grid[0]):
+                    self.grid[px-i][py+j].add(layer)
+                if px+i < len(self.grid[0]) and py-j >= 0:
+                    self.grid[px+i][py-j].add(layer)
+                if px-i >= 0 and py-j >= 0:
+                    self.grid[px-i][py-j].add(layer)
+            k-=1
+        
+                
 
     def on_undo(self):
         """Called when an undo is requested."""
@@ -314,7 +339,7 @@ class MyWindow(arcade.Window):
 
     def on_special(self):
         """Called when the special action is requested."""
-        pass
+        self.grid.special()
 
     def on_replay_start(self):
         """Called when the replay starting is requested."""
@@ -353,4 +378,6 @@ def run_with_func(func, pause=False):
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    for  i in range(1, 3):
+        print(i)

@@ -104,15 +104,28 @@ class BSet(Set[int]):
         return '{' + ', '.join(out_elems) + '}'
 
 if __name__ == '__main__':
-    s = BSet(3)
-    s.add(1)
-    s.add(4)
-    print(f'S = {s}')
-    t = BSet(3)
-    t.add(4)
-    t.add(2)
-    t.add(2)
-    print(f'T = {t}')
+    test = BSet(3)
+    test.add(1)
+    test.add(10)
+    test.add(4)
+    print(test)
 
-    print(f'S union T = {s.union(t)}')
-    print(f'S intersect T = {s.intersection(t)}')
+    test2 = BSet(3)
+    test2.add(1)
+    test2.add(0)
+    print(test2)
+
+    print(test == test2)
+
+    # s = BSet(3)
+    # s.add(1)
+    # s.add(4)
+    # print(f'S = {s}')
+    # t = BSet(3)
+    # t.add(4)
+    # t.add(2)
+    # t.add(2)
+    # print(f'T = {t}')
+
+    # print(f'S union T = {s.union(t)}')
+    # print(f'S intersect T = {s.intersection(t)}')
