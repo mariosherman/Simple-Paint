@@ -47,6 +47,8 @@ class Grid:
         Increases the size of the brush by 1,
         if the brush size is already MAX_BRUSH,
         then do nothing.
+
+        complexity: O(1)
         """
         if self.brush_size < self.MAX_BRUSH:
             self.brush_size += 1
@@ -56,6 +58,8 @@ class Grid:
         Decreases the size of the brush by 1,
         if the brush size is already MIN_BRUSH,
         then do nothing.
+
+        complexity: O(1)
         """
         if self.brush_size > self.MIN_BRUSH:
             self.brush_size -= 1
@@ -63,6 +67,10 @@ class Grid:
     def special(self):
         """
         Activate the special affect on all grid squares.
+
+        complexity: O(n * m)
+        n: the length of the X axis / outer Array
+        m: the length of the Y axis / inner Array
         """
         for x in range(len(self.grid)):
             for y in range(len(self.grid)):

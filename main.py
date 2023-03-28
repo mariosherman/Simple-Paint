@@ -5,6 +5,8 @@ from grid import Grid
 from layer_util import get_layers, Layer
 from layers import lighten
 from undo import UndoTracker
+from replay import ReplayTracker
+from action import PaintAction, PaintStep
 
 class MyWindow(arcade.Window):
     """ Painter Window """
@@ -289,11 +291,12 @@ class MyWindow(arcade.Window):
     def on_init(self):
         """Initialisation that occurs after the system initialisation."""
         self.undo_tracker = UndoTracker()
+        self.replay_tracker = ReplayTracker()
         
     
     def on_reset(self):
         """Called when a window reset is requested."""
-        pass
+        self.on_init()
 
     def on_paint(self, layer: Layer, px, py):
         """
@@ -303,43 +306,41 @@ class MyWindow(arcade.Window):
         layer: The layer being applied.
         px: x position of the brush.
         py: y position of the brush.
+
+        complexity: O(n^2)
+        n: manhattan distance / brush size
         """
-        self.grid[px][py].add(layer)
-        k = self.grid.brush_size
-        for i in range(self.grid.brush_size+1):
-            if px + i < len(self.grid[0]):
-                self.grid[px+i][py].add(layer)
-            if py + i < len(self.grid[0]):
-                self.grid[px][py+i].add(layer)
-            if px-i >= 0:
-                self.grid[px-i][py].add(layer)
-            if py-i >= 0:   
-                self.grid[px][py-i].add(layer)
-
-            for j in range(1, k+1):
-                if px+i < len(self.grid[0]) and py+j < len(self.grid[0]):
-                    self.grid[px+i][py+j].add(layer)
-                if px-i >= 0 and py+j < len(self.grid[0]):
-                    self.grid[px-i][py+j].add(layer)
-                if px+i < len(self.grid[0]) and py-j >= 0:
-                    self.grid[px+i][py-j].add(layer)
-                if px-i >= 0 and py-j >= 0:
-                    self.grid[px-i][py-j].add(layer)
-            k-=1
-        
+        action = PaintAction()
+        manhattan_distance = self.grid.brush_size
+        for i in range(-manhattan_distance, manhattan_distance+1):
+            for j in range(-manhattan_distance, manhattan_distance+1):
+                if abs(px - (px+i)) + abs(py - (py+j)) <= manhattan_distance and px+i >= 0 and px+i < len(self.grid.grid)\
+                    and py+j >= 0 and py+j < len(self.grid.grid):
+                    if self.grid[px+i][py+j].add(layer):
+                        action.add_step(PaintStep((px+i, py+j), layer))
+   
+        self.undo_tracker.add_action(action)
+        self.replay_tracker.add_action(action)    
                 
-
     def on_undo(self):
         """Called when an undo is requested."""
-        pass
+        action = self.undo_tracker.undo(self.grid)
+        if action != None:
+            self.replay_tracker.add_action(action, True)
 
     def on_redo(self):
         """Called when a redo is requested."""
-        pass
+        action = self.undo_tracker.redo(self.grid)
+        if action != None:
+            self.replay_tracker.add_action(action)
 
     def on_special(self):
         """Called when the special action is requested."""
         self.grid.special()
+
+        action = PaintAction(0, is_special = True)
+        self.undo_tracker.add_action(action)
+        self.replay_tracker.add_action(action)
 
     def on_replay_start(self):
         """Called when the replay starting is requested."""
@@ -350,8 +351,8 @@ class MyWindow(arcade.Window):
         Called when the next step of the replay is requested.
         Returns whether the replay is finished.
         """
-        return True
-
+        return self.replay_tracker.play_next_action(self.grid)
+        
     def on_increase_brush_size(self):
         """Called when an increase to the brush size is requested."""
         self.grid.increase_brush_size()
@@ -378,6 +379,4 @@ def run_with_func(func, pause=False):
 
 
 if __name__ == "__main__":
-    # main()
-    for  i in range(1, 3):
-        print(i)
+    main()
