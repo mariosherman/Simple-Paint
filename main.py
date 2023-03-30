@@ -308,7 +308,7 @@ class MyWindow(arcade.Window):
         py: y position of the brush.
 
         complexity: O(n^2)
-        n: manhattan distance / brush size
+        n: manhattan distance*2 + 1
         """
         action = PaintAction()
         manhattan_distance = self.grid.brush_size
@@ -329,7 +329,10 @@ class MyWindow(arcade.Window):
             self.replay_tracker.add_action(action, True)
 
     def on_redo(self):
-        """Called when a redo is requested."""
+        """Called when a redo is requested.
+        
+        Complexity: O(1)
+        """
         action = self.undo_tracker.redo(self.grid)
         if action != None:
             self.replay_tracker.add_action(action)

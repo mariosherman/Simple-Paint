@@ -34,6 +34,8 @@ class ReplayTracker:
         Returns a boolean.
             - If there were no more actions to play, and so nothing happened, return True.
             - Otherwise, return False.
+
+        Complexity: O(1)
         """
 
         if self.actions.is_empty():

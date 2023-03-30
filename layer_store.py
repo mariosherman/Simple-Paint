@@ -2,6 +2,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from layer_util import Layer
 from layers import *
+from layer_util import get_layers
 
 # ADTs
 from data_structures.queue_adt import CircularQueue
@@ -10,7 +11,6 @@ from data_structures.array_sorted_list import ArraySortedList
 from data_structures.sorted_list_adt import ListItem
 from data_structures.bset import BSet
 from data_structures.set_adt import *
-from layer_util import get_layers
 
 
 class LayerStore(ABC):
@@ -56,27 +56,51 @@ class SetLayerStore(LayerStore):
     """
 
     def __init__(self) -> None:
+        """
+        Explanation:
+        Initialises instance variables:
+        - self.layers (Layer) : to store a singular layer object
+        - self.spec (Boolean) :   to store a boolean which indicates whether the special effect is on/off
+        
+        Parameters: self
+        Returns: None
+
+        Complexity: O(1)
+        """
         self.layers = None
         self.spec = False
 
     def get_color(self, start, timestamp, x, y) -> tuple[int, int, int]:
         """
+        Explanation:
         Gets the end-product color from the layer(s) in self.layers.
         Checks if self.spec is true or false (check whether to add special effects or not)
-        if 
+        if true then apply special effects, i.e invert the color
+            then checks again whether the current layer exists or not, i.e not None
+            if so apply the special effect using start, the base color
+            else apply the invert using the color from the current layer
+        
+        else apply color without speciall effects, i.e apply original color not invert
+            then checks again whether the current layer exists or not, i.e not None
+            if so apply color using the start, the base color
+            else apply the color using the current layer stored in self.layers
 
         Parameters:
-        - start: base or bottom color represented in a tuple of 3 integers, RGB
-        - timestamp: is used by some layers for dynamic effects.
-        - x: x/horizontal coordinates of the grid
-        - y: y/vertical coordinates of the grid
+        - self
+        - start (tuple)[int, int, int]: base or bottom color represented in a tuple of 3 integers, RGB
+        - timestamp (int): is used by some layers for dynamic effects.
+        - x (int)   : x/horizontal coordinates of the grid
+        - y(int)    : y/vertical coordinates of the grid
 
+        Returns:
+        - tuple[int, int, int]: a color tuple of 3 integers (RGB)
 
-        complexity: O(1)?
+        Complexity: O(n)
+        n: n is the length of the color tuple, we loop through the color tuple in the apply function
         """
         if self.spec == True:
             if self.layers == None:
-                return invert.apply(start, timestamp, x , y)
+                return invert.apply(start, timestamp, x , y) 
             return invert.apply(self.layers.apply(start, timestamp, x, y), timestamp, x, y)
         else:
             if self.layers == None:
@@ -91,7 +115,8 @@ class SetLayerStore(LayerStore):
         if not, change the current layer and return true to indicate that the change is successful
 
         Parameters:
-        - layer: a Layer object
+        - self
+        - layer (Layer): a Layer object
 
         Returns:
         - bool: - True if the add process is successful, i.e if the layer we want to add is not the same as
@@ -113,13 +138,15 @@ class SetLayerStore(LayerStore):
         Explanation: 
         Removes the current layer of this layerstore if there is an existing layer
 
-        parameters:
-        - layer: a Layer object
-        returns:
+        Parameters:
+        - self
+        - layer (Layer): a Layer object
+
+        Returns:
         - bool: - True if the erase process is successful, i.e the current layer in self.layers is not None
                 - False if the erase process is unsuccessful, i.e the current layer in self.layers is None
 
-                Indicates whether the erase process is successful or not.
+              Indicates whether the erase process is successful or not.
 
         Complexity: O(1)
         """
@@ -165,25 +192,48 @@ class AdditiveLayerStore(LayerStore):
     def add(self, layer: Layer) -> bool:
         """ 
         Explanation:
-        Checks whether self.layers (Circular Queue) is full
-        if not, then append the layer we want to add
-        if full, don't add
+        Function to add a layer into self.layers (Circular Queue)
 
-        parameters:
-        layer: a Layer object which we want to add into self.layers
+        Parameters:
+        - self
+        - layer (Layer): a Layer object which we want to add into self.layers
 
-        returns:
-        bool: - True if the add process is successful, i.e if the Queue is not full
-              - False if the add process is unsuccessful, i.e if the Queue is full
+        Returns:
+        - bool: - True if the add process is successful, i.e if the Queue is not full
+                - False if the add process is unsuccessful, i.e if the Queue is full
+
+              Indicates whether the add process is successful or not
 
         Complexity: O(1)
         """
-        if not self.layers.is_full():
-            self.layers.append(layer)    
-            return True
-        return False
+        if not self.layers.is_full(): # Checks whether self.layers (Circular Queue) is full
+            self.layers.append(layer) # if not, then append the layer we want to add
+            return True 
+        return False # if full, don't add
 
     def get_color(self, start, timestamp, x, y) -> tuple[int, int, int]:
+        """
+        Explanation:
+        Gets the end-product color from the layer(s) in self.layers
+        Checks whether self.layers is empty or not
+        if empty, return start: base color
+        if not, keep serving and applying colors from the Queue on top of each other
+
+        Parameters:
+        - self
+        - start (tuple[int, int, int]) : base or bottom color represented in a tuple of 3 integers, RGB
+        - timestamp (int) : an integer value which is used by some layers to create dynamic effects
+        - x (int) : X/horizontal coordinates of the grid
+        - y (int) : Y/vertical coordinates of the grid
+
+        Returns:
+        - tuple[int, int, int]: the end-product color from continuously applying colors stored in self.layers
+                 on top of each other (RGB)
+        
+        Complexity: O(n)
+        O(apply)
+        n: length of the Circular Queue in self.layers
+        """
         if self.layers.is_empty():
             return start
         else:
@@ -195,12 +245,36 @@ class AdditiveLayerStore(LayerStore):
             return temp_color
 
     def erase(self, layer: Layer) -> bool:
+        """
+        Explanation:
+        Removes the oldest layer in the Circular Queue
+
+        Parameters: 
+        - self
+        - layer: a Layer object
+
+        Returns:
+        - bool: - True if the erase process is successful, i.e if the Queue in self.layers is not empty
+                - False if the erase process is unsuccesssful, i.e if the Queue in self.layers is empty
+        
+        Complexity: O(1)
+        """
         if not self.layers.is_empty():
             self.layers.serve()
             return True
         return False
             
     def special(self):
+        """
+        Explanation:
+        Reverse the order of the layers inside the Circular Queue in self.layers
+
+        Parameters: self
+        Returns   : None
+
+        Complexity: O(n)
+        n: n is the length of Circular Queue in self.layers
+        """
         temp_stack = ArrayStack(len(self.layers))
         for _ in range(len(self.layers)):
             temp_stack.push(self.layers.serve())
@@ -219,15 +293,30 @@ class SequenceLayerStore(LayerStore):
         In the event of two layers being the median names, pick the lexicographically smaller one.
     """
 
-    NUMBER_OF_LAYERS = 9
+    NUMBER_OF_LAYERS = 9 # Indicates the number of layers
 
     def __init__(self) -> None:
+        """
+        Explanation:
+        Initialises instance variables:
+        - self.layers (ArrayR)   : a referential array which stores all of the existing arrays,
+                                   e.g rainbow, invert, etc.
+        - self.layers_set (BSet) : a BSet which is used to store all the layer indexes which
+                                   have been added.
+        """
         self.layers = get_layers()[:self.NUMBER_OF_LAYERS]
-        self.layers_set = BSet(9)
+        self.layers_set = BSet(self.NUMBER_OF_LAYERS)
 
     def get_color(self, start, timestamp, x, y) -> tuple[int, int, int]:
         """
+        Explanation:
+        Gets the end-product of the color from the layer(s) which are currenty applied
+        Checks whether self.layers_set is empty or not (checks whether there are any layers applying)
+        if empty return start, the base color
+        if not iterate through self.layers, keep on applying the colors whose index+1 are in self.layers_set
+
         Complexity: O(n)
+        n: The length of self.layers
         """
         
         if self.layers_set.is_empty():
@@ -240,12 +329,40 @@ class SequenceLayerStore(LayerStore):
             return temp_color
 
     def add(self, layer: Layer) -> bool:
-        if layer.index+1 not in self.layers_set and layer != None:
+        """
+        Explanation:
+        Function to make a layer apply, adds the layer's index+1 to self.layers_set
+
+        Parameters:
+        - layer (Layer): a Layer object
+
+        Returns:
+        - bool: - True if we made the layer apply, i.e if the layer's index+1 is not in self.layers_set
+                - False if the layer is already applying, i.e if the layer's index+1 is already in self.layers_set
+
+        Complexity: O(1)
+        """
+        if layer.index+1 not in self.layers_set:
             self.layers_set.add(layer.index+1)
             return True
         return False
             
     def erase(self, layer: Layer) -> bool:
+        """
+        Explanation:
+        Function to make a layer NOT apply, removes the layer's index+1 from self.layers_set
+
+        Parameters:
+        - layer (Layer): a layer object
+
+        Returns:
+        - bool: - True if we manage to make the layer not apply, i.e if the layer's index+1 is in self.layers_set
+                - False if the layer is already not applying, i.e if the layer's index+1 is not in self.layers_set
+
+                Indicates whether the erase process is successful or not
+        
+        Complexity: O(1)??
+        """
         if layer.index+1 in self.layers_set:
             self.layers_set.remove(layer.index+1)
         else:
@@ -255,8 +372,12 @@ class SequenceLayerStore(LayerStore):
     def special(self):
         """
         Explanation:
+        Function to remove the median applying layer lexicographically ordered
 
-        complexity: O(n)
+        Parameters: self
+        Returns   : None
+
+        Complexity: O(n) ? 
         n: the length of self.layers 
         """
         if not self.layers_set.is_empty():
@@ -277,6 +398,6 @@ class SequenceLayerStore(LayerStore):
    
 
 if __name__ == "__main__":
-    a = SequenceLayerStore()
-    for layer in a.layers:
-        print(layer)
+    b = BSet(3)
+    b.add(10)
+    print(b)

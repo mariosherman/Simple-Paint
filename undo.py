@@ -15,6 +15,8 @@ class UndoTracker:
 
         If your collection is already full,
         feel free to exit early and not add the action.
+
+        Complexity: O(1)
         """
         if not self.tracker.is_full():
             self.tracker.push(action)
@@ -27,6 +29,8 @@ class UndoTracker:
         If there are no actions to undo, simply do nothing.
 
         :return: The action that was undone, or None.
+
+        Complexity: O(1)
         """
         if not self.tracker.is_empty():
             action = self.tracker.pop()
@@ -40,11 +44,12 @@ class UndoTracker:
         If there are no actions to redo, simply do nothing.
 
         :return: The action that was redone, or None.
+
+        Complexity: O(1)
         """
         if not self.undone.is_empty():
             action = self.undone.pop()
             action.redo_apply(grid)
-            # self.add_action(action)
             self.tracker.push(action)
             return action
         return None
