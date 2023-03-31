@@ -27,18 +27,23 @@ class Grid:
         - x, y: The dimensions of the grid.
 
         Should also intialise the brush size to the DEFAULT provided as a class variable.
+
+        Complexity: O(n + nm)
+        n: The horizontal length of the grid, self.x
+        m: The vertical length of the grid, self.y   
         """
-        self.draw_style = draw_style
+        self.draw_style = draw_style # Check for draw style
         if self.draw_style == self.DRAW_STYLE_OPTIONS[0]:
             layer_store_type = SetLayerStore
         elif self.draw_style == self.DRAW_STYLE_OPTIONS[1]:
             layer_store_type = AdditiveLayerStore
         elif self.draw_style == self.DRAW_STYLE_OPTIONS[2]:
             layer_store_type = SequenceLayerStore
-        self.grid = ArrayR(x)
-        for i in range(len(self.grid)):
-            self.grid[i] = ArrayR(y)
-            for j in range(len(self.grid[i])):
+
+        self.grid = ArrayR(x) # O(n), initialise a referential array with the size of x
+        for i in range(len(self.grid)): # O(n), For each index in self.grid, instantiate a referential array with size of y
+            self.grid[i] = ArrayR(y) # O(m)
+            for j in range(len(self.grid[i])): # O(m), For each index in the newly instantiated referential array, instantiate a layer store based on the draw style we chose
                 self.grid[i][j] = layer_store_type()
         self.brush_size = self.DEFAULT_BRUSH_SIZE
 
@@ -71,13 +76,18 @@ class Grid:
         complexity: O(nm * special)
         n: the length of the X axis / outer Array
         m: the length of the Y axis / inner Array
-        the complexity of the special function differs
+        Special because the time complexity of the special function differs depending on the type of layer store
         """
-        for x in range(len(self.grid)):
+        for x in range(len(self.grid)): # Apply the special effect for every layerstore in the grid
             for y in range(len(self.grid)):
                 self.grid[x][y].special()
     
     def __getitem__ (self, x: int):
+        """
+        Magic method to access a value inside the grid based on index
+
+        Complex
+        """
         return self.grid[x]
 
 if __name__ == "__main__":

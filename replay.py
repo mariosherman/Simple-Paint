@@ -8,6 +8,13 @@ class ReplayTracker:
 
     MAX_ACTIONS = 10000
     def __init__(self) -> None:
+        """
+        Instantiates instance variables:
+        - self.actions: a Circular Queue used to store Paint actions
+
+        Cmoplexity: O(n)
+        n: MAX_ACTIONS
+        """
         self.actions = CircularQueue(self.MAX_ACTIONS)
 
     def start_replay(self) -> None:
@@ -15,6 +22,8 @@ class ReplayTracker:
         Called whenever we should stop taking actions, and start playing them back.
 
         Useful if you have any setup to do before `play_next_action` should be called.
+
+        Complexity: O(1)
         """
         # NULL
         pass
@@ -25,6 +34,8 @@ class ReplayTracker:
 
         `is_undo` specifies whether the action was an undo action or not.
         Special, Redo, and Draw all have this is False.
+
+        Complexity: O(1)
         """
         self.actions.append(ListItem(is_undo, action))
 
@@ -35,19 +46,22 @@ class ReplayTracker:
             - If there were no more actions to play, and so nothing happened, return True.
             - Otherwise, return False.
 
-        Complexity: O(1)
+        Complexity: O(nm . special) 
+        Case when action done is special
+        n: The horizontal length of the grid
+        m: The vertical length of the grid
+        Special because the time complexity may differ depending on the type of layer store
         """
 
-        if self.actions.is_empty():
+        if self.actions.is_empty(): # If theres nothing to play return True 
             return True
-        
-        action = self.actions.serve()
-        if action.key == None:
+        action = self.actions.serve() 
+        if action.key == None: # If theres nothing to play return True (just in case)
             return True
-        if action.value == False:
+        if action.value == False: # If its not an undo action, redo the actio
             action.key.redo_apply(grid)
-        elif action.value == True:
-            action.key.undo_apply(grid)
+        elif action.value == True: # If it's an undo act
+            action.key.undo_apply(grid) 
         return False
         
 
@@ -69,4 +83,3 @@ if __name__ == "__main__":
     f3 = r.play_next_action(g) # action 2, undo
     t = r.play_next_action(g)  # True, nothing to do.
     assert (f1, f2, f3, t) == (False, False, False, True)
-
