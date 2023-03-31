@@ -68,9 +68,10 @@ class Grid:
         """
         Activate the special affect on all grid squares.
 
-        complexity: O(n * m)
+        complexity: O(nm * special)
         n: the length of the X axis / outer Array
         m: the length of the Y axis / inner Array
+        the complexity of the special function differs
         """
         for x in range(len(self.grid)):
             for y in range(len(self.grid)):

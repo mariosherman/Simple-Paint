@@ -361,7 +361,7 @@ class SequenceLayerStore(LayerStore):
 
                 Indicates whether the erase process is successful or not
         
-        Complexity: O(1)??
+        Complexity: O(1)
         """
         if layer.index+1 in self.layers_set:
             self.layers_set.remove(layer.index+1)
@@ -377,20 +377,19 @@ class SequenceLayerStore(LayerStore):
         Parameters: self
         Returns   : None
 
-        Complexity: O(n) ? 
+        Complexity: O(n) 
         n: the length of self.layers 
         """
         if not self.layers_set.is_empty():
             # Create an ArraySortedList to sort alphabetically/lexicographically
             alphabetical_ordered_list = ArraySortedList(len(self.layers_set))
-            for i in range(len(self.layers)):
+            for i in range(len(self.layers)): # O(n)
                 if self.layers[i].index+1 in self.layers_set:
-                    alphabetical_ordered_list.add(ListItem(self.layers[i], self.layers[i].name))
+                    alphabetical_ordered_list.add(ListItem(self.layers[i], self.layers[i].name)) 
             
             # Remove from set
             if len(alphabetical_ordered_list) % 2 != 0:
                 self.erase(alphabetical_ordered_list[(len(alphabetical_ordered_list)//2)].value)
-                alphabetical_ordered_list.delete_at_index(len(alphabetical_ordered_list)//2)
             else:
                 self.erase(alphabetical_ordered_list[((len(alphabetical_ordered_list)-1)//2)].value)
 
